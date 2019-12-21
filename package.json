@@ -1,0 +1,36 @@
+{
+  "name": "puffbot",
+  "version": "1.0.0",
+  "description": "QQ chatbots with CoolQ, as easy as a puff.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "commit": "git-cz",
+    "test": "jest --coverage --config=jest.config.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t532/puff.git"
+  },
+  "author": "t532",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/t532/puff/issues"
+  },
+  "homepage": "https://github.com/t532/puff#readme",
+  "devDependencies": {
+    "@types/koa": "^2.11.0",
+    "@types/koa-bodyparser": "^4.3.0",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "^3.0.2",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.7.3"
+  },
+  "dependencies": {
+    "httpie": "^1.1.2",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.2.1"
+  }
+}
