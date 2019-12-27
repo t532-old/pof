@@ -1,10 +1,10 @@
-# puff
+# pof.js
 
 ```sh
-npm install --save puffbot
+npm install --save pofjs
 ```
 
-***puff** 是又一个基于 酷Q 的轻量 QQ 机器人框架。*
+***pof.js** 是又一个基于 酷Q 的轻量 QQ 机器人框架。*
 
 > 我们想让框架变得更轻。  
 > 我们想摆脱繁琐的配置与约定。  

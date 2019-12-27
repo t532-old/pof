@@ -1,7 +1,7 @@
 {
-  "name": "puffbot",
+  "name": "pofjs",
   "version": "1.0.0-alpha.1",
-  "description": "QQ chatbots with CoolQ, as easy as a puff.",
+  "description": "Yet another lightweight QQ bot framework based on CoolQ.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/t532/puff.git"
+    "url": "git+https://github.com/t532/pof.git"
   },
   "author": "t532",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/t532/puff/issues"
+    "url": "https://github.com/t532/pof/issues"
   },
-  "homepage": "https://github.com/t532/puff#readme",
+  "homepage": "https://github.com/t532/pof#readme",
   "devDependencies": {
     "@types/node": "^13.1.0",
     "commitizen": "^4.0.3",
