@@ -6,7 +6,7 @@ import { raw, MaybeRaw } from './interface'
 
 export type ApiName =
     'send_private_msg' | 'send_group_msg' | 'send_discuss_msg' | 'send_msg' | 'delete_msg' | 'send_like' |
-    'set_gorup_kick' | 'set_group_ban' | 'set_group_anonymous_ban' | 'set_group_whole_ban' |
+    'set_group_kick' | 'set_group_ban' | 'set_group_anonymous_ban' | 'set_group_whole_ban' |
     'set_group_admin' | 'set_group_anonymous' | 'set_group_card' | 'set_group_leave' | 'set_group_special_title' |
     'set_discuss_leave' | 'set_friend_add_request' | 'set_group_add_request' |
     'get_login_info' | 'get_stranger_info' | 'get_friend_list' |
@@ -132,7 +132,7 @@ export const Send = (url: string, apiKey?: string) => {
         sendLike: <Ep<SendLikeRequest, NullResponse>> ep
             ('send_like', 'user_id times'),
         setGroupKick: <Ep<SetGroupKickRequest, NullResponse>> ep
-            ('set_gorup_kick', 'user_id group_id reject_add_request'),
+            ('set_group_kick', 'user_id group_id reject_add_request'),
         setGroupBan: <Ep<SetGroupBanRequest, NullResponse>> ep
             ('set_group_ban', 'user_id group_id duration'),
         setGroupAnonymousBan: <Ep<SetGroupAnonymousBanRequest, NullResponse>> ep
