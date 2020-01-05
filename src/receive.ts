@@ -32,11 +32,11 @@ export type EventName =
     'meta_event' | 'meta_event$lifecycle' | 'meta_event$lifecycle$enable' | 'meta_event$lifecycle$disable' |
     'meta_event$heartbeat'
 
-export type EventBase = { time: number, self_id: number, types: EventName[] }
-export type GroupEvent = { group_id: number }
-export type UserEvent = { user_id: number }
-export type DiscussEvent = { discuss_id: number }
-export type SubtypedEvent = { sub_type: string }
+export type EventBase = {time: number, self_id: number, types: EventName[]}
+export type GroupEvent = {group_id: number}
+export type UserEvent = {user_id: number}
+export type DiscussEvent = {discuss_id: number}
+export type SubtypedEvent = {sub_type: string}
 export type MessageEvent<T extends 'private' | 'group' | 'discuss'
     = 'private' | 'group' | 'discuss'> = EventBase & UserEvent & {
     post_type: 'message'
@@ -55,7 +55,7 @@ export type PrivateMessageEvent<St extends 'friend' | 'group' | 'discuss' | 'oth
 export type GroupMessageEvent<St extends 'normal' | 'anonymous' | 'notice'
     = 'normal' | 'anonymous' | 'notice'> = MessageEvent<'group'> & GroupEvent & {
     sub_type: St
-    anonymous?: { id: number, name: string, flag: string }
+    anonymous?: {id: number, name: string, flag: string}
     sender: GetGroupMemberInfoResponse
 }
 export type DiscussMessageEvent = MessageEvent<'discuss'> & DiscussEvent & {

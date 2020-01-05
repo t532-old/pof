@@ -20,24 +20,24 @@ export const endpoint =
     <T, R>(apiName: ApiName, keys?: string) =>
     (...data: MaybeRaw<Extensive<Partial<T>>>[]) => post(
         new URL(apiName, url), {
-        headers: apiKey ? { authorization: `Bearer ${apiKey}` } : {},
+        headers: apiKey ? {authorization: `Bearer ${apiKey}`} : {},
         body: kvFilter(merge(data.map(raw)))(([k]) => 
             keys?.split(' ').includes(k) ?? true),
     }).then(res =>
         flipOut(res.data, 'data') as ResponseBase<R>)
 
-export type ResponseBase<T> = T & { $status: 'ok' | 'failed', $retcode: number }
+export type ResponseBase<T> = T & {$status: 'ok' | 'failed', $retcode: number}
 export type Ep<T, R> = (...data: Extensive<Partial<T>>[]) => Promise<ResponseBase<R>>
 
 export type NullResponse = {}
-export type FileResponse = { file: string }
-export type BinaryResponse = { yes: boolean }
-export type SendMsgResponse = { message_id: number }
-export type GetLoginInfoResponse = { user_id: number, nickname: string }
-export type GetStrangerInfoResponse = GetLoginInfoResponse & { sex: 'male' | 'female' | 'unkown', age: number }
-export type GetFriendInfoResponse = GetLoginInfoResponse & { remark: string }
-export type GetGroupInfoBriefResponse = { group_id: number, group_name: string }
-export type GetGroupInfoResponse = GetGroupInfoBriefResponse & { member_count: number, max_member_count: number }
+export type FileResponse = {file: string}
+export type BinaryResponse = {yes: boolean}
+export type SendMsgResponse = {message_id: number}
+export type GetLoginInfoResponse = {user_id: number, nickname: string}
+export type GetStrangerInfoResponse = GetLoginInfoResponse & {sex: 'male' | 'female' | 'unkown', age: number}
+export type GetFriendInfoResponse = GetLoginInfoResponse & {remark: string}
+export type GetGroupInfoBriefResponse = {group_id: number, group_name: string}
+export type GetGroupInfoResponse = GetGroupInfoBriefResponse & {member_count: number, max_member_count: number}
 export type GetGroupMemberInfoResponse = GetStrangerInfoResponse & {
     group_id: string
     card: string
@@ -75,41 +75,41 @@ export type SendMsgBaseRequest = {
     message: string | Code[]
     auto_escape?: boolean
 }
-export type UserRequest = { user_id: number }
-export type GroupRequest = { group_id: number }
-export type DiscussRequest = { discuss_id: number }
+export type UserRequest = {user_id: number}
+export type GroupRequest = {group_id: number}
+export type DiscussRequest = {discuss_id: number}
 export type SendPrivateMsgRequest = SendMsgBaseRequest & UserRequest
 export type SendGroupMsgRequest = SendMsgBaseRequest & GroupRequest
 export type SendDiscussMsgRequest = SendMsgBaseRequest & DiscussRequest
 export type SendMsgRequest = SendMsgBaseRequest & (
-    (Partial<UserRequest> & { message_type?: 'private' }) |
-    (Partial<GroupRequest> & { message_type?: 'group' }) |
-    (Partial<DiscussRequest> & { message_type?: 'discuss' }))
-export type DeleteMsgRequest = { message_id: number }
-export type SendLikeRequest = UserRequest & { times?: number }
-export type SetGroupKickRequest = GroupRequest & UserRequest & { reject_add_request?: boolean }
-export type SetGroupBanRequest = GroupRequest & UserRequest & { duration?: number }
-export type SetGroupAnonymousBanRequest = GroupRequest & { anonymous?: object, anonymous_flag?: string, duration?: number }
-export type SetGroupWholeBanRequest = GroupRequest & { enable?: boolean }
-export type SetGroupAdminRequest = GroupRequest & UserRequest & { enable?: boolean }
-export type SetGroupAnonymousRequest = GroupRequest & { enable?: boolean }
-export type SetGroupCardRequest = GroupRequest & UserRequest & { card: string }
-export type SetGroupLeaveRequest = GroupRequest & { is_dismiss?: boolean }
-export type SetGroupSpecialTitleRequest = GroupRequest & UserRequest & { special_title?: string }
-export type SetAddRequestRequest = { flag: string, approve?: boolean }
-export type SetFriendAddRequestRequest = SetAddRequestRequest & { remark?: string }
-export type SetGroupAddRequestRequest = SetAddRequestRequest & { sub_type: 'add' | 'invite', reason?: string }
+    (Partial<UserRequest> & {message_type?: 'private'}) |
+    (Partial<GroupRequest> & {message_type?: 'group'}) |
+    (Partial<DiscussRequest> & {message_type?: 'discuss'}))
+export type DeleteMsgRequest = {message_id: number}
+export type SendLikeRequest = UserRequest & {times?: number}
+export type SetGroupKickRequest = GroupRequest & UserRequest & {reject_add_request?: boolean}
+export type SetGroupBanRequest = GroupRequest & UserRequest & {duration?: number}
+export type SetGroupAnonymousBanRequest = GroupRequest & {anonymous?: object, anonymous_flag?: string, duration?: number}
+export type SetGroupWholeBanRequest = GroupRequest & {enable?: boolean}
+export type SetGroupAdminRequest = GroupRequest & UserRequest & {enable?: boolean}
+export type SetGroupAnonymousRequest = GroupRequest & {enable?: boolean}
+export type SetGroupCardRequest = GroupRequest & UserRequest & {card: string}
+export type SetGroupLeaveRequest = GroupRequest & {is_dismiss?: boolean}
+export type SetGroupSpecialTitleRequest = GroupRequest & UserRequest & {special_title?: string}
+export type SetAddRequestRequest = {flag: string, approve?: boolean}
+export type SetFriendAddRequestRequest = SetAddRequestRequest & {remark?: string}
+export type SetGroupAddRequestRequest = SetAddRequestRequest & {sub_type: 'add' | 'invite', reason?: string}
 export type SetDiscussLeaveRequest = DiscussRequest
-export type GetStrangerInfoRequest = UserRequest & { no_cache?: boolean }
-export type GetGroupInfoRequest = GroupRequest & { no_cache?: boolean }
-export type GetGroupMemberInfoRequest = GroupRequest & UserRequest & { no_cache?: boolean }
+export type GetStrangerInfoRequest = UserRequest & {no_cache?: boolean}
+export type GetGroupInfoRequest = GroupRequest & {no_cache?: boolean}
+export type GetGroupMemberInfoRequest = GroupRequest & UserRequest & {no_cache?: boolean}
 export type GetGroupMemberListRequest = GroupRequest
 export type RecordFormat = 'mp3' | 'amr' | 'wma' | 'm4a' | 'spx' | 'ogg' | 'wav' | 'flac'
-export type GetRecordRequest = { file: string, out_format: RecordFormat, full_path?: boolean }
-export type GetImageRequest = { file: string }
-export type SetRestartPluginRequest = { delay: string }
+export type GetRecordRequest = {file: string, out_format: RecordFormat, full_path?: boolean}
+export type GetImageRequest = {file: string}
+export type SetRestartPluginRequest = {delay: string}
 export type DataDirectory = 'image' | 'record' | 'show' | 'bface'
-export type CleanDataDirRequest = { data_dir: DataDirectory }
+export type CleanDataDirRequest = {data_dir: DataDirectory}
 
 export const Send = (url: string, apiKey?: string) => {
     const ep = endpoint(url, apiKey)
@@ -117,7 +117,7 @@ export const Send = (url: string, apiKey?: string) => {
         send: (msg: Extensive<MaybeRaw<SendMsgRequest>>) => (...frags: Parameters<typeof template>) =>
             ep<SendMsgRequest, SendMsgResponse>(
                 'send_msg', 'message_type group_id user_id message auto_escape')(
-                msg, { message: template(...frags) }),
+                msg, {message: template(...frags)}),
         call: ep,
         sendPrivateMsg: <Ep<SendPrivateMsgRequest, SendMsgResponse>> ep
             ('send_private_msg', 'user_id message auto_escape'),
