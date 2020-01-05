@@ -20,8 +20,8 @@ export const endpoint =
     (data?: Extensive<T>) => post(
         new URL(apiName, url), {
         headers: apiKey ? {authorization: `Bearer ${apiKey}`} : {},
-        body: kvFilter(data)(([k]) => 
-            keys?.split(' ').includes(k) ?? true),
+        body: kvFilter(data)
+            (([k]) => keys?.split(' ').includes(k as string) ?? true),
     }).then(res =>
         flipOut(res.data, 'data') as ResponseBase<R>)
 

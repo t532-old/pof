@@ -11,8 +11,7 @@ export const flipOut = (x: object, center: string) => {
 
 export const noop = (..._: any[]) => {}
 
-type KvPair = [string, any]
-type Kv = Record<string, any>
+type KvPair = [PropertyKey, any]
 
 export const merge = <T extends object, U>(x: T, y: U) =>
     Object.fromEntries([
@@ -20,16 +19,21 @@ export const merge = <T extends object, U>(x: T, y: U) =>
         ...Object.entries(y)
     ]) as T & U
 
-type Mapping = (kv: KvPair, idx: number, entries: KvPair[]) => KvPair
-export const kvMap = (x: Kv) => (f: Mapping) =>
+type Mapping = (kv?: KvPair, idx?: number, entries?: KvPair[]) => KvPair
+export const kvMap = <T>(x: T) => (f: Mapping) => 
     Object.fromEntries(
         Object.entries(x).map(f))
+type AsyncMapping = (kv?: KvPair, idx?: number, entries?: KvPair[]) => Promise<KvPair>
+export const kvMapAsync = <T>(x: T) => async (f: AsyncMapping) =>
+    Promise.all(Object.entries(x).map(f))
+    .then(Object.fromEntries)
 
-type Predicate = (kv: KvPair, idx: number, entries: KvPair[]) => boolean
-export const kvFilter = (x: Kv) => (f: Predicate) =>
+type Predicate = (kv?: KvPair, idx?: number, entries?: KvPair[]) => boolean
+export const kvFilter = <T>(x: T) => (f: Predicate) =>
     Object.fromEntries(
         Object.entries(x).filter(f))
 
 export type MaybePromise<T> = T | Promise<T>
+export type UnpackPromise<T> = T extends Promise<infer Tx> ? Tx : T 
 
 export type Extensive<T> = T & Record<PropertyKey, any>
