@@ -2,7 +2,6 @@ import { post } from 'httpie'
 import { URL } from 'url'
 import { flipOut, merge, kvFilter, Extensive } from './util'
 import { Code, template } from './code'
-import { raw, MaybeRaw } from './interface'
 
 export type ApiName =
     'send_private_msg' | 'send_group_msg' | 'send_discuss_msg' | 'send_msg' | 'delete_msg' | 'send_like' |
@@ -18,16 +17,17 @@ export type ApiName =
 export const endpoint =
     (url: string, apiKey?: string) =>
     <T, R>(apiName: ApiName, keys?: string) =>
-    (...data: MaybeRaw<Extensive<Partial<T>>>[]) => post(
+    (data?: Extensive<T>) => post(
         new URL(apiName, url), {
         headers: apiKey ? {authorization: `Bearer ${apiKey}`} : {},
-        body: kvFilter(merge(data.map(raw)))(([k]) => 
+        body: kvFilter(data)(([k]) => 
             keys?.split(' ').includes(k) ?? true),
     }).then(res =>
         flipOut(res.data, 'data') as ResponseBase<R>)
 
 export type ResponseBase<T> = T & {$status: 'ok' | 'failed', $retcode: number}
-export type Ep<T, R> = (...data: Extensive<Partial<T>>[]) => Promise<ResponseBase<R>>
+export type Ep<T, R> = (data: Extensive<T>) => Promise<ResponseBase<R>>
+export type NullEp<R> = () => Promise<ResponseBase<R>>
 
 export type NullResponse = {}
 export type FileResponse = {file: string}
@@ -114,10 +114,10 @@ export type CleanDataDirRequest = {data_dir: DataDirectory}
 export const Send = (url: string, apiKey?: string) => {
     const ep = endpoint(url, apiKey)
     return {
-        send: (msg: Extensive<MaybeRaw<SendMsgRequest>>) => (...frags: Parameters<typeof template>) =>
+        send: (msg: Extensive<Omit<SendMsgRequest, 'message'>>) => (...frags: Parameters<typeof template>) =>
             ep<SendMsgRequest, SendMsgResponse>(
                 'send_msg', 'message_type group_id user_id message auto_escape')(
-                msg, {message: template(...frags)}),
+                merge(msg, {message: template(...frags)})),
         call: ep,
         sendPrivateMsg: <Ep<SendPrivateMsgRequest, SendMsgResponse>> ep
             ('send_private_msg', 'user_id message auto_escape'),
@@ -153,13 +153,13 @@ export const Send = (url: string, apiKey?: string) => {
             ('set_friend_add_request', 'flag approve remark'),
         setGroupAddRequest: <Ep<SetGroupAddRequestRequest, NullResponse>> ep
             ('set_group_add_request', 'flag sub_type approve reason'),
-        getLoginInfo: <Ep<null, GetLoginInfoResponse>> ep
+        getLoginInfo: <NullEp<GetLoginInfoResponse>> ep
             ('get_login_info', ''),
         getStrangerInfo: <Ep<GetStrangerInfoRequest, GetStrangerInfoResponse>> ep
             ('get_stranger_info', 'user_id no_cache'),
-        getFriendList: <Ep<null, GetFriendInfoResponse[]>> ep
+        getFriendList: <NullEp<GetFriendInfoResponse[]>> ep
             ('get_friend_list', ''),
-        getGroupList: <Ep<null, GetGroupInfoBriefResponse[]>> ep
+        getGroupList: <NullEp<GetGroupInfoBriefResponse[]>> ep
             ('get_group_list', ''),
         getGroupInfo: <Ep<GetGroupInfoRequest, GetGroupInfoResponse>> ep
             ('get_group_info', 'group_id no_cache'),
@@ -167,25 +167,25 @@ export const Send = (url: string, apiKey?: string) => {
             ('get_group_member_info', 'group_id user_id no_cache'),
         getGroupMemberList: <Ep<GetGroupMemberListRequest, Partial<GetGroupMemberInfoResponse>[]>> ep
             ('get_group_member_list', 'group_id'),
-        getCredentials: <Ep<null, GetCredentialsResponse>> ep
+        getCredentials: <NullEp<GetCredentialsResponse>> ep
             ('get_credentials', ''),
         getRecord: <Ep<GetRecordRequest, FileResponse>> ep
             ('get_record', 'file out_format full_path'),
         getImage: <Ep<GetImageRequest, FileResponse>> ep
             ('get_image', 'file'),
-        canSendImage: <Ep<null, BinaryResponse>> ep
+        canSendImage: <NullEp<BinaryResponse>> ep
             ('can_send_image', ''),
-        canSendRecord: <Ep<null, BinaryResponse>> ep
+        canSendRecord: <NullEp<BinaryResponse>> ep
             ('can_send_record', ''),
-        getStatus: <Ep<null, GetStatusResponse>> ep
+        getStatus: <NullEp<GetStatusResponse>> ep
             ('get_status', ''),
-        getVersionInfo: <Ep<null, GetVersionInfoResponse>> ep
+        getVersionInfo: <NullEp<GetVersionInfoResponse>> ep
             ('get_version_info', ''),
         setRestartPlugin: <Ep<SetRestartPluginRequest, NullResponse>> ep
             ('set_restart_plugin', 'delay'),
         cleanDataDir: <Ep<CleanDataDirRequest, NullResponse>> ep
             ('clean_data_dir', 'data_dir'),
-        cleanPluginLog: <Ep<null, NullResponse>> ep
+        cleanPluginLog: <NullEp<NullResponse>> ep
             ('clean_plugin_log', ''),
     }
 }
