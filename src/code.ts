@@ -1,10 +1,12 @@
 import { defined } from './util'
 
+/** Available CQCode types */
 export type CodeType =
     'text' | 'at' | 'anonymous' |
     'face' | 'emoji' | 'bface' | 'sface' |
     'record' | 'image' | 'music' | 'share' | 'location' |
     'rps' | 'dice' | 'shake' | 'sign'
+/** Object representation of CQCodes */
 export interface Code<N = CodeType, T = any> {
     type: N
     data: T
@@ -31,6 +33,10 @@ type CQObject = {
     shake: ToCode<'shake', null>
 }
 
+/**
+ * Shorthand for constructing CQCodes
+ * @example `CQ.image({file: '/example/path/foo.jpg'}) === {type: 'image', data: {file: '/example/path/foo.jpg'}}`
+ */
 export const CQ = new Proxy({}, {
     get: (_, type) => data => ({type, data})
 }) as CQObject
@@ -41,8 +47,9 @@ const isCode = (x: any): x is Code =>
     typeof x.type === 'string' &&
     defined(x.data) &&
     typeof x.data === 'object'
-const toCode = (x: any) => isCode(x) ? x : CQ.text({text: x.toString()})
-export const template = (text: TemplateStringsArray, ...codes: Code[]) =>
+const toCode = (x: any) => isCode(x) ? x : CQ.text({text: String(x)})
+/** Template string function that forms `Code[]` from a template string */
+export const template = (text: TemplateStringsArray, ...codes: any[]) =>
     text
     .filter(str => str.length !== 0)
     .map((text, pos) => [CQ.text({text}), toCode(codes[pos])])
@@ -65,6 +72,7 @@ const encodeCodeText = (str: string) =>
 const decodeCodeText = (str: string) =>
     decodePlainText(str)
     .replace(/&#44;/g, ',')
+/** Convert `Code[]` to equivalent `string` representation */
 export const toText = (codes: Code[]) =>
     codes
     .map(x => x.type === 'text' ?
@@ -86,6 +94,7 @@ const fromCodeSegment = (x: string) => {
         .map(([k, v]) => [k, decodeCodeText(v)]))
     }
 }
+/** Convert `string` to equivalent `Code[]` representation */
 export const toArray = (str: string) =>
     str
     .split(/(?=\[)|(?<=\])/)
