@@ -3,6 +3,7 @@ import { URL } from 'url'
 import { flipOut, merge, kvFilter, Extensive } from './util'
 import { Code, template } from './code'
 
+/** Available CQHTTP API names */
 export type ApiName =
     'send_private_msg' | 'send_group_msg' | 'send_discuss_msg' | 'send_msg' | 'delete_msg' | 'send_like' |
     'set_group_kick' | 'set_group_ban' | 'set_group_anonymous_ban' | 'set_group_whole_ban' |
@@ -14,6 +15,7 @@ export type ApiName =
     'can_send_image' | 'can_send_record' | 'get_status' | 'get_version_info' |
     'set_restart_plugin' | 'clean_data_dir' | 'clean_plugin_log'
 
+/** Create a CQHTTP API endpoint function */
 export const endpoint =
     (url: string, apiKey?: string) =>
     <T, R>(apiName: ApiName, keys?: string) =>
@@ -111,13 +113,17 @@ export type SetRestartPluginRequest = {delay: string}
 export type DataDirectory = 'image' | 'record' | 'show' | 'bface'
 export type CleanDataDirRequest = {data_dir: DataDirectory}
 
+export type SendObject = ReturnType<typeof Send>
+
+/** Create a Send object to communicate with CQHTTP API */
 export const Send = (url: string, apiKey?: string) => {
     const ep = endpoint(url, apiKey)
     return {
+        /** Template function for sending messages; indicate target with a `SendMsgRequest` object. */
         send: (msg: Extensive<Omit<SendMsgRequest, 'message'>>) => (...frags: Parameters<typeof template>) =>
             ep<SendMsgRequest, SendMsgResponse>(
                 'send_msg', 'message_type group_id user_id message auto_escape')(
-                merge(msg, {message: template(...frags)})),
+                merge(msg)({message: template(...frags)})),
         call: ep,
         sendPrivateMsg: <Ep<SendPrivateMsgRequest, SendMsgResponse>> ep
             ('send_private_msg', 'user_id message auto_escape'),
