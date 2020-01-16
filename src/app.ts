@@ -1,10 +1,11 @@
 import { ReceiveObject } from './receive'
 import { SendObject } from './send'
 import { Mw, Message, MwFunction } from './mw'
-import { Arrow, Failure, extract, ExtractMapping, ExtractResult, step, Step } from './step'
+import { Arrow, Failure, extract, ExtractMapping, ExtractResult, step } from './step'
 import { id } from './util'
 
-export const root: Step<Message, Message> = step(id)
+export const certain = <T>() => step<T, T>(id)
+export const root = certain<Message>()
 
 export const App = ({receive, send, mw = new Mw()}: {
     receive: ReceiveObject
