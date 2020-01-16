@@ -1,5 +1,7 @@
 # pof.js
 
+> **Note that this is a work in progress.**
+
 ```sh
 npm install --save pofjs
 ```
@@ -16,6 +18,38 @@ npm install --save pofjs
 - 新的消息处理方式：通过组合经过简单包装的异步函数（`Step`s），实现高效的模式匹配。
 - 只有，两个，依赖。
 - 只支持通过同步 HTTP 方式与 CQHTTP 通信。~~觉得慢就不要用了~~
+
+## Roadmap
+- [ ] `Receive` - Well-typed receiver
+    - [x] Types
+    - [x] Server
+    - [ ] Tests
+- [ ] `Send` - Well-typed sender
+    - [x] Types
+    - [x] Client
+    - [x] Fluent send API
+    - [ ] Tests
+- [ ] `Code` - Util functions dealing w/ CQCodes
+    - [x] Implementation
+    - [ ] Tests
+- [ ] `Step` - Kleisli arrows w/ useful methods
+    - [x] Implementation
+    - [ ] Tests
+- [ ] `Mw` - Middlewares
+    - [x] Implementation
+    - [ ] Tests
+- [ ] `App` - Application-level functionalities
+    - [x] simple utils
+    - [x] `match()`
+    - [ ] `get()` with time/attempt limitations
+    - [ ] proper blockage
+    - [ ] Tests
+- [ ] `Toddler` - 4 Sets of `Step`s with basic message parsing mechanics
+    - [ ] `content` - parse string content
+    - [ ] `sieve` - parse rich content (`Code`s)
+    - [ ] `command` - parse command-formatted content (much weaker than that of [Koishi](https://npm.im/koishi)'s)
+    - [ ] `origin` - parse sender info
+    - [ ] Tests
 
 ## 贡献
 
