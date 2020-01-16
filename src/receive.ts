@@ -7,10 +7,10 @@ import TypedEventEmitter from 'strict-event-emitter-types'
 import { Code } from './code'
 import { GetFriendInfoResponse, GetGroupMemberInfoResponse, GetStrangerInfoResponse, GetStatusResponse } from './send'
 
-const read = (stream: Readable) => new Promise<string>($return => {
+const read = (stream: Readable) => new Promise<string>(pure => {
     let result = ''
     stream.on('data', data => result += data)
-    stream.on('end', () => $return (result))
+    stream.on('end', () => pure(result))
 })
 
 const endResponse = (res: ServerResponse, code: number) => {
@@ -18,6 +18,7 @@ const endResponse = (res: ServerResponse, code: number) => {
     res.end()
 }
 
+/** All supported CQHTTP Post event names */
 export type EventName =
     '*' | 'message' |
     'message$private' | 'message$private$friend' |  'message$private$group' | 'message$private$discuss' | 'message$private$other' |
@@ -125,7 +126,7 @@ export type HeartbeatMetaEvent = MetaEvent<'heartbeat'> & {
 }
 
 export type Listener<T> = (e: T) => void
-export type ReceiveEventEmitter = TypedEventEmitter<EventEmitter, {
+export type ReceiveObject = TypedEventEmitter<EventEmitter, {
     '*': Listener<
         PrivateMessageEvent |
         GroupMessageEvent |
@@ -204,8 +205,9 @@ const parseMsg = (x: any) => {
     return x as EventBase
 }
 
+/** Create an `EventEmitter` that receives posts from CQHTTP */
 export const Receive = (port: number, secret?: string) => {
-    const emitter: ReceiveEventEmitter = new EventEmitter()
+    const emitter: ReceiveObject = new EventEmitter()
     createServer(async (req, res) => {
         const strMsg = await read(req)
         let jsonMsg: object
@@ -224,6 +226,7 @@ export const Receive = (port: number, secret?: string) => {
         }
         const parsedMsg: EventBase = parseMsg(jsonMsg)
         parsedMsg.types.forEach(x => emitter.emit(x, parsedMsg as any))
+        return endResponse(res, 200)
     }).listen(port)
     return emitter
 }
