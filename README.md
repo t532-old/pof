@@ -1,4 +1,4 @@
-# pof.js
+![pof.js](docs/.vuepress/public/header.jpg)
 
 > **Note that this is a work in progress.**
 
@@ -14,8 +14,9 @@ npm install --save pofjs
 
 这是一次新的尝试：试着用尽可能容易理解的，强类型的，函数式的方法解决问题。
 
-- Well-typed，支持会话，支持中间件。
 - 新的消息处理方式：通过组合经过简单包装的异步函数（`Step`s），实现高效的模式匹配。
+- 对于 TypeScripters：Well-typed。你不大可能被迫使用 `any`（除非有些东西确实应该是 `any` ...）。
+- 支持基于异步消息流的会话（和 Ion.js 很相似，但经过简化），支持中间件。
 - 只有，两个，依赖。
 - 只支持通过同步 HTTP 方式与 CQHTTP 通信。~~觉得慢就不要用了~~
 
@@ -39,10 +40,11 @@ npm install --save pofjs
     - [x] Implementation
     - [ ] Tests
 - [ ] `App` - Application-level functionalities
-    - [x] simple utils
-    - [x] `match()`
-    - [ ] `get()` with time/attempt limitations
-    - [ ] proper blockage
+    - [ ] `match()`
+    - [ ] `fetch()` with time/attempt limitations
+    - [ ] Tests
+- [ ] `Session` - Message Stream & Session manager
+    - [x] borrow from Ion.js (not copy)
     - [ ] Tests
 - [ ] `Toddler` - 4 Sets of `Step`s with basic message parsing mechanics
     - [ ] `content` - parse string content
