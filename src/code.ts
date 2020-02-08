@@ -1,36 +1,37 @@
 import { defined } from './util'
 
-/** Available CQCode types */
-export type CodeType =
-    'text' | 'at' | 'anonymous' |
-    'face' | 'emoji' | 'bface' | 'sface' |
-    'record' | 'image' | 'music' | 'share' | 'location' |
-    'rps' | 'dice' | 'shake' | 'sign'
 /** Object representation of CQCodes */
 export interface Code<N = CodeType, T = any> {
     type: N
     data: T
 }
 
-type ToCode<N, T> = (x?: T) => {type: N, data: T}
-type CQObject = {
-    text: ToCode<'text', {text: string}>
-    at: ToCode<'at', {qq: number}>
-    anonymous: ToCode<'anonymous', {ignore: boolean}>
-    face: ToCode<'face', {id: number}>
-    emoji: ToCode<'emoji', {id: number}>
-    bface: ToCode<'bface', {id: number}>
-    sface: ToCode<'sface', {id: number}>
-    record: ToCode<'record', {file: string, magic?: boolean}>
-    image: ToCode<'image', {file: string}>
-    music: ToCode<'music',
+/** Available CQCode types */
+export type CodeType =
+    'text' | 'at' | 'anonymous' |
+    'face' | 'emoji' | 'bface' | 'sface' |
+    'record' | 'image' | 'music' | 'share' | 'location' |
+    'rps' | 'dice' | 'shake' | 'sign'
+
+/** Content of CQCode types */
+export type CodeContent = {
+    text: {text: string}
+    at: {qq: number}
+    anonymous: {ignore: boolean}
+    face: {id: number}
+    emoji: {id: number}
+    bface: {id: number}
+    sface: {id: number}
+    record: {file: string, magic?: boolean}
+    image: {file: string}
+    music:
         {type: 'qq' | '163', id: number} |
-        {type: 'custom', url: string, audio: string, title: string, content?: string, image?: string}>
-    share: ToCode<'share', {url: string, title: string, content?: string, image?: string}>
-    location: ToCode<'location', {lat: number, lon: number, title: string, content: string}>
-    rps: ToCode<'rps', null>
-    dice: ToCode<'dice', null>
-    shake: ToCode<'shake', null>
+        {type: 'custom', url: string, audio: string, title: string, content?: string, image?: string}
+    share: {url: string, title: string, content?: string, image?: string}
+    location: {lat: number, lon: number, title: string, content: string}
+    rps: null
+    dice: null
+    shake: null
 }
 
 /**
@@ -39,7 +40,8 @@ type CQObject = {
  */
 export const CQ = new Proxy({}, {
     get: (_, type) => data => ({type, data})
-}) as CQObject
+}) as {[k in keyof CodeContent]:
+    (x?: CodeContent[k]) => Code<k, CodeContent[k]>}
 
 const isCode = (x: any): x is Code =>
     defined(x) &&
@@ -108,3 +110,34 @@ export const {
     image, record, music, share, location,
     rps, dice, shake
 } = CQ
+
+/** Pick a certian type of CQCode from Code[] */
+export const pick = new Proxy({}, {
+    get: (_, type) => (data: Code[]) =>
+        data.filter(i => type == i.type).map(x => x.data)
+}) as {[k in keyof CodeContent]:
+    (x: Code[]) => CodeContent[k][]}
+
+/** Pick the first Code of a certain type from Code[] */
+export const pickFirst = new Proxy({}, {
+    get: (_, type) => (data: Code[]) =>
+        pick[type](data)[0] ?? null
+}) as {[k in keyof CodeContent]:
+    (x: Code[]) => CodeContent[k] | null}
+
+/** Pick the last Code of a certain type from Code[] */
+export const pickLast = new Proxy({}, {
+    get: (_, type) => (data: Code[]) =>
+        pick[type](data).reverse()[0] ?? null
+}) as {[k in keyof CodeContent]:
+    (x: Code[]) => CodeContent[k] | null}
+
+/** Pick all plain text from Code[] */
+export const pickText = (data: Code[]) =>
+    pick.text(data).map(i => i.text).join('')
+
+/** Pick all numerals (no multi-negation, leading or trailing point) */
+export const pickNumber = (data: Code[]) => 
+    pickText(data)
+    .match(/[+-]?\d+(\.\d+)?/g)
+    .map(x => parseFloat(x))
