@@ -206,3 +206,12 @@ export const step = <T, R>(f: Arrow<T, R>): Step<T, R> =>
         }) as Step<T, R>
 
 export const die = (x: string) => { throw new Failure(x) }
+
+export const unFailure = <T>(x: Promise<T>) => <U>(alt: U) =>
+    x.catch(e => {
+        if (e instanceof Failure) return alt
+        else throw e
+    })
+
+export const safe = <T, R>(f: Arrow<T, R>) => <S>(alt: S) => (x: T) =>
+    unFailure(pure(f(x)))(alt)
