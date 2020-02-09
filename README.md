@@ -28,9 +28,9 @@ npm install --save pofjs
 - [ ] `Send` - Well-typed sender
     - [x] Types
     - [x] Client
-    - [x] Fluent send API
+    - [x] Template Send API
     - [ ] Tests
-- [ ] `Code` - Util functions dealing w/ CQCodes
+- [ ] `Code` - Util functions for dealing w/ CQCodes
     - [x] Implementation
     - [ ] Tests
 - [ ] `Step` - Kleisli arrows w/ useful methods
@@ -40,13 +40,13 @@ npm install --save pofjs
     - [x] Implementation
     - [ ] Tests
 - [ ] `App` - Application-level functionalities
-    - [ ] `match()`
-    - [ ] `fetch()` with time/attempt limitations
+    - [x] `match()`
     - [ ] Tests
 - [ ] `Session` - Message Stream & Session manager
     - [x] borrow from Ion.js (not copy)
+    - [x] proper time limits and max attempts limits
     - [ ] Tests
-- [ ] `Toddler` - 4 Sets of `Step`s with basic message parsing mechanics
+- [ ] `Prelude` - 4 Sets of `Step`s with basic message parsing mechanics
     - [ ] `content` - parse string content
     - [ ] `sieve` - parse rich content (`Code`s)
     - [ ] `command` - parse command-formatted content (much weaker than that of [Koishi](https://npm.im/koishi)'s)
