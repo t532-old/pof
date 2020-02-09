@@ -19,9 +19,11 @@ export class Mw<T> {
         return this
     }
     call(arg: T, pos = 0) {
-        return pos < this.mw.length ?
-            this.mw[pos](arg, () =>
-                this.call(arg, pos + 1)) :
-            Mw.FINISHED
+        try {
+            return pos < this.mw.length ?
+                this.mw[pos](arg, () =>
+                    this.call(arg, pos + 1)) :
+                Mw.FINISHED
+        } catch (e) { console.error(e) }
     }
 }
