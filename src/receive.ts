@@ -4,7 +4,7 @@ import { createHmac } from 'crypto'
 import { EventEmitter } from 'events'
 import { defined } from './util'
 import TypedEventEmitter from 'strict-event-emitter-types'
-import { Code } from './code'
+import { Code, toText, toArray } from './code'
 import { GetFriendInfoResponse, GetGroupMemberInfoResponse, GetStrangerInfoResponse, GetStatusResponse } from './send'
 
 const read = (stream: Readable) => new Promise<string>(pure => {
@@ -202,6 +202,14 @@ const parseMsg = (x: any) => {
     ]
     if ('sub_type' in x)
         x.types.push(x.post_type + '$' + eventType + '$' + x.sub_type)
+    if ('message' in x) {
+        if (x.message instanceof Array) {
+            x.message_array = x.message
+            x.message = toText(x.message)
+        } else {
+            x.message_array = toArray(x.message)
+        }
+    }
     return x as EventBase
 }
 

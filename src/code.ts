@@ -43,13 +43,13 @@ export const CQ = new Proxy({}, {
 }) as {[k in keyof CodeContent]:
     (x?: CodeContent[k]) => Code<k, CodeContent[k]>}
 
-const isCode = (x: any): x is Code =>
+export const isCode = (x: any): x is Code =>
     defined(x) &&
     typeof x === 'object' && 
     typeof x.type === 'string' &&
     defined(x.data) &&
     typeof x.data === 'object'
-const toCode = (x: any) => isCode(x) ? x : CQ.text({text: String(x)})
+export const toCode = (x: any) => isCode(x) ? x : CQ.text({text: String(x)})
 /** Template string function that forms `Code[]` from a template string */
 export const template = (text: TemplateStringsArray, ...codes: any[]) =>
     text
@@ -58,20 +58,20 @@ export const template = (text: TemplateStringsArray, ...codes: any[]) =>
     .flat()
     .slice(0, -1)
 
-const encodePlainText = (str: string) =>
+export const encodePlainText = (str: string) =>
     str
     .replace(/&/g, '&amp;')
     .replace(/\[/g, '&#91;')
     .replace(/\]/g, '&#93;')
-const decodePlainText = (str: string) =>
+export const decodePlainText = (str: string) =>
     str
     .replace(/&amp;/g, '&')
     .replace(/&#91;/g, '[')
     .replace(/&#93;/g, ']')
-const encodeCodeText = (str: string) =>
+export const encodeCodeText = (str: string) =>
     encodePlainText(str)
     .replace(/,/g, '&#44;')
-const decodeCodeText = (str: string) =>
+export const decodeCodeText = (str: string) =>
     decodePlainText(str)
     .replace(/&#44;/g, ',')
 /** Convert `Code[]` to equivalent `string` representation */
@@ -86,7 +86,7 @@ export const toText = (codes: Code[]) =>
             .join(',')
         }]`)
     .join('')
-const fromCodeSegment = (x: string) => {
+export const fromCodeSegment = (x: string) => {
     const [_, type, kvs] = x.match(/\[CQ:(\w+)(?:,(.*))?\]/)
     return {
         type,
@@ -103,13 +103,6 @@ export const toArray = (str: string) =>
     .map(x => x.startsWith('[') ?
         fromCodeSegment(x) :
         CQ.text({text: decodePlainText(x)}))
-
-export const {
-    text, at, anonymous,
-    face, emoji, bface, sface,
-    image, record, music, share, location,
-    rps, dice, shake
-} = CQ
 
 /** Pick a certian type of CQCode from Code[] */
 export const pick = new Proxy({}, {

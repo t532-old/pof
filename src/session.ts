@@ -2,16 +2,14 @@ import { MessageStream } from './stream'
 import { MaybePromise } from './util'
 
 type IdentifierFunction<T> = (x: T) => MaybePromise<any>
-type SessionFunction<T> = (st: MessageStream<T>) => Promise<void>
-type SessionPredicate<T> = (data: T) => MaybePromise<boolean>
 
-interface Sessions<T> {
+export interface Sessions<T> {
     makeIdentifier: IdentifierFunction<T>
     create(x: T): Promise<MessageStream<T>>
     run: (x: T) => MaybePromise<void>
 }
 
-class SessionInUseError extends Error {}
+export class SessionInUseError extends Error {}
 
 export class SessionManager<T> implements Sessions<T> {
     private sessions: Map<any, MessageStream<T>> = new Map() 
