@@ -1,11 +1,15 @@
 import { PassThrough } from 'stream'
+import { Arrow, Failure } from './step'
 
 /** Error thrown if one attempts to fetch a message after the stream is closed */
 export class StreamEndedError extends Error {}
 
-/** A PassThrough stream equipped with an async fetch() function */
-export class Stream<T> extends PassThrough {
-    constructor () {
+/** A PassThrough stream
+ * equipped with an async fetch() function and a conditioned get() function */
+export class MessageStream<T> extends PassThrough {
+    constructor (
+        private readonly del: () => void
+    ) {
         super({objectMode: true})
     }
     fetch() { return new Promise<T>(async (pure, fail) => {
@@ -25,4 +29,21 @@ export class Stream<T> extends PassThrough {
         this.once('readable', onReadable)
         this.once('close', onClose)
     })}
+    async get<R>(f: Arrow<T, R>) {
+        while (true) {
+            try {
+                return await f(await this.fetch())
+            } catch (e) {
+                if (e instanceof Failure) {
+                    continue
+                } else {
+                    throw e
+                }
+            }
+        }
+    }
+    close() {
+        this.end()
+        this.del()
+    }
 }
