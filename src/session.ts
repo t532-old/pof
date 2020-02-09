@@ -1,58 +1,75 @@
 import { MessageStream } from './stream'
 import { MaybePromise } from './util'
 
-type IdentifierFunction<T> = (x: T) => MaybePromise<any>
+/** Type of identifier generators */
+export type IdentifierFunction<T> = (x: T) => MaybePromise<any>
+export type SessionFunction<T> = (st: MessageStream<T>) => Promise<void>
+export type SessionPredicate<T> = (data: T) => MaybePromise<boolean>
 
+/** Thrown by SessionManager when trying to create a stream for a session already in use */
+export class SessionInUseError extends Error {}
+
+/** A session manager based on MessageStream */
 export interface Sessions<T> {
+    /** The identifier generator.
+     * Identifiers are used to distinguish messages in different sessions.
+     * Identifier generators should only generate comparable (in other words, primitive) values */
     makeIdentifier: IdentifierFunction<T>
-    create(x: T): Promise<MessageStream<T>>
+    /** Register a function equipped with a predicate that indicates when to begin a session */
+    use: (p: SessionPredicate<T>, f: SessionFunction<T>) => Sessions<T>
+    /** Pass an object from a session to the session's corresponding stream */
     run: (x: T) => MaybePromise<void>
 }
 
-export class SessionInUseError extends Error {}
-
+/** Impelementation of a session manager */
 export class SessionManager<T> implements Sessions<T> {
-    private sessions: Map<any, MessageStream<T>> = new Map() 
+    private sessions: Map<any, MessageStream<T>> = new Map()
+    private fns: {
+        exec: SessionFunction<T>
+        match: SessionPredicate<T>
+    }[] = []
     constructor (
         public readonly makeIdentifier: IdentifierFunction<T>
     ) {}
-    async create(x: T) {
-        const ident = await this.makeIdentifier(x)
-        if (this.sessions.has(ident)) {
-            throw new SessionInUseError('Session already in use')
-        } else {
-            const stream = new MessageStream<T>(() =>
-                this.sessions.delete(ident))
-            this.sessions.set(ident, stream)
-            return stream
-        }
+    use(match: SessionPredicate<T>, exec: SessionFunction<T>) {
+        this.fns.push({match, exec})
+        return this
     }
     async run(x: T) {
         const ident = await this.makeIdentifier(x)
-        this.sessions.get(ident)?.write(x)
+        if (!this.sessions.has(ident)) {
+            for (const {exec, match} of this.fns) {
+                if (await match(ident)) {
+                    const stream = new MessageStream<T>(() =>
+                        this.sessions.delete(ident))
+                    exec(stream)
+                    .then(() => stream.close())
+                    .catch(console.error)
+                    break
+                }
+            }
+        }
+        if (this.sessions.has(ident)) {
+            this.sessions.get(ident).write(x)
+        }
     }
 }
 
+/** An alternative session manager which allows multiple streams to be created on the same session */
 export class CosessionManager<T> implements Sessions<T> {
-    private sessions: Map<any, Map<symbol, MessageStream<T>>> = new Map() 
+    private mgrs: SessionManager<T>[] = []
     constructor (
         public readonly makeIdentifier: IdentifierFunction<T>
     ) {}
-    async create(x: T) {
-        const ident = await this.makeIdentifier(x)
-        const sym = Symbol()
-        const stream = new MessageStream<T>(() =>
-                this.sessions.get(ident).delete(sym))
-        if (this.sessions.has(ident)) {
-            this.sessions.get(ident).set(sym, stream)
-        } else {
-            this.sessions.set(ident, new Map([[sym, stream]]))
-        }
-        return stream
+    use(match: SessionPredicate<T>, exec: SessionFunction<T>) {
+        this.mgrs.push(
+            new SessionManager<T>(this.makeIdentifier)
+            .use(match, exec))
+        return this
     }
     async run(x: T) {
-        const ident = await this.makeIdentifier(x)
-        this.sessions.get(ident)
-        ?.forEach(v => v.write(x))
+        for (const mgr of this.mgrs) {
+            mgr.run(x)
+        }
     }
 }
