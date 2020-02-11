@@ -1,10 +1,9 @@
 import { MessageEvent, ReceiveObject, DiscussMessageEvent, GroupMessageEvent, PrivateMessageEvent } from './receive'
 import { SendObject } from './send'
 import { Mw } from './mw'
-import { safe, step, Arrow, ExtractMapping, ExtractResult, extract } from './step'
-import { SessionManager, CosessionManager, Sessions, SessionFunction } from './session'
+import { safe, Arrow, ExtractMapping, extract, certain } from './step'
+import { SessionManager, CosessionManager, Sessions } from './session'
 import { MessageStream } from './stream'
-import { id } from './util'
 
 export type LooseMessageEvent =
     MessageEvent &
@@ -14,7 +13,6 @@ export type LooseMessageEvent =
 
 export interface Message extends LooseMessageEvent {}
 
-export const certain = <T>() => step<T, T>(id)
 export const root = certain<Message>()
 
 export const positionOf = (x: Message) => {

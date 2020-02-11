@@ -1,4 +1,4 @@
-import { kvMapAsync } from './util'
+import { kvMapAsync, id } from './util'
 
 /**
  * **Pseudo Operator `[then]`** -
@@ -205,13 +205,24 @@ export const step = <T, R>(f: Arrow<T, R>): Step<T, R> =>
             [fail]: makeFail(f)
         }) as Step<T, R>
 
-export const die = (x: string) => { throw new Failure(x) }
+/** Fail with optional message */
+export const die = (x?: string) => { throw new Failure(x) }
 
+/** If a promise fails then resolve with a given value */
 export const unFailure = <T>(x: Promise<T>) => <U>(alt: U) =>
     x.catch(e => {
         if (e instanceof Failure) return alt
         else throw e
     })
 
+/** unFailure() lifted to arrows */
 export const safe = <T, R>(f: Arrow<T, R>) => <S>(alt: S) => (x: T) =>
     unFailure(pure(f(x)))(alt)
+
+/** get a property of an object */
+export const prop =
+    <T, K extends keyof T>(k: K) =>
+        step((x: T) => x[k])
+
+/** id() lifted to arrows */
+export const certain = <T>() => step<T, T>(id)
