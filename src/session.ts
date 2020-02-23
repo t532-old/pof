@@ -1,5 +1,6 @@
 import { MessageStream } from './stream'
-import { MaybePromise } from './util'
+import { MaybePromise, noop } from './util'
+import { Failure } from './step'
 
 /** Type of identifier generators */
 export type IdentifierFunction<T> = (x: T) => MaybePromise<any>
@@ -29,7 +30,8 @@ export class SessionManager<T> implements Sessions<T> {
         match: SessionPredicate<T>
     }[] = []
     constructor (
-        public readonly makeIdentifier: IdentifierFunction<T>
+        public readonly makeIdentifier: IdentifierFunction<T>,
+        public readonly onfail: (m: T, e: Failure) => any = noop,
     ) {}
     use(match: SessionPredicate<T>, exec: SessionFunction<T>) {
         this.fns.push({match, exec})
@@ -40,8 +42,9 @@ export class SessionManager<T> implements Sessions<T> {
         if (!this.sessions.has(ident)) {
             for (const {exec, match} of this.fns) {
                 if (await match(ident)) {
-                    const stream = new MessageStream<T>(() =>
-                        this.sessions.delete(ident))
+                    const stream = new MessageStream<T>(
+                        () => this.sessions.delete(ident),
+                        this.onfail)
                     exec(stream)
                     .then(() => stream.close())
                     .catch(console.error)
@@ -59,11 +62,12 @@ export class SessionManager<T> implements Sessions<T> {
 export class CosessionManager<T> implements Sessions<T> {
     private mgrs: SessionManager<T>[] = []
     constructor (
-        public readonly makeIdentifier: IdentifierFunction<T>
+        public readonly makeIdentifier: IdentifierFunction<T>,
+        public readonly onfail: (m: T, e: Failure) => any = noop,
     ) {}
     use(match: SessionPredicate<T>, exec: SessionFunction<T>) {
         this.mgrs.push(
-            new SessionManager<T>(this.makeIdentifier)
+            new SessionManager<T>(this.makeIdentifier, this.onfail)
             .use(match, exec))
         return this
     }

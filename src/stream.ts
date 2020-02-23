@@ -12,7 +12,8 @@ export class StreamMaxAttemptsError extends Error {}
  * equipped with an async fetch() function and a conditioned get() function */
 export class MessageStream<T> extends PassThrough {
     constructor (
-        private readonly del: () => void
+        private readonly del: () => void,
+        private readonly onfail: (m: T, e: Failure) => any,
     ) {
         super({objectMode: true})
     }
@@ -47,12 +48,14 @@ export class MessageStream<T> extends PassThrough {
     async get<R>(f: Arrow<T, R>, { maxAttempts = Infinity, timeout = Infinity }) {
         for (let attempts = 1; attempts <= maxAttempts; attempts++) {
             const timeBefore = Date.now()
+            let obj: T
             try {
-                return await f(await this.fetch(timeout))
+                obj = await this.fetch(timeout)
+                return await f(obj)
             } catch (e) {
                 if (!(e instanceof Failure)) {
                     throw e
-                }
+                } else this.onfail(obj, e)
             }
             const timeElapsed = Date.now() - timeBefore
             timeout = Math.max(0, timeout - timeElapsed)
